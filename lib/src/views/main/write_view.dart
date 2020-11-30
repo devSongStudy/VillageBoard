@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_svprogresshud/flutter_svprogresshud.dart';
 import 'package:villageboard/src/helpers/app_config.dart' as ex;
+import 'package:http/http.dart' as http;
 
 class WriteView extends StatefulWidget {
   @override
@@ -115,27 +119,62 @@ class _WriteViewState extends State<WriteView> {
     String title = _titleInputController.text;
     print('title: $title');
     if (title.isEmpty) {
-      // TODO: 제목을 입력하세요
+      SVProgressHUD.showError(status: "제목을 입력하세요.");
       return false;
     }
 
     String discription = _descriptionInputController.text;
     print('discription: $discription');
     if (discription.isEmpty) {
-      // TODO: 내용을 입력하세요
+      SVProgressHUD.showError(status: "내용을 입력하세요");
       return false;
     }
 
-    // TODO: 등록
+    bool result = false;
 
+    SVProgressHUD.show();
+    try {
+      var urlString = "https://us-central1-villageboard-74c6b.cloudfunctions.net"+"/board/normal";
+      var body = json.encode({
+        "title": title,
+        "discription": discription
+      });
+      final response = await http.post(urlString, body: body, headers: {'content-type':'application/json'});
+      if (response.statusCode == 200) {
+        print("response: $response.body");
+        Map<String, dynamic> object = jsonDecode(response.body);
+        int resCode = object['resCode'];
+        if (resCode == 0) {
+          result = true;
+        } else {
+          throw Exception('$resCode: ${object['resMessage']}');
+        }
+        SVProgressHUD.dismiss();
+      } else {
+        throw Exception('failed to load data: ${response.statusCode}');
+      }
+    } catch (err) {
+      print("Error: $err");
+      SVProgressHUD.showError(status: err.toString());
+      SVProgressHUD.dismiss(delay: Duration(milliseconds: 2000));
+    }
 
-    // TODO: 등록후 결과 메세지 보여주고 이전 화면으로 이동
-    setState(() {
-      _titleInputController.text = "";
-      _descriptionInputController.text = "";
-    });
+    if (result) {
 
-    return true;
+      SVProgressHUD.showSuccess(status: "Success!");
+
+      setState(() {
+        _titleInputController.text = "";
+        _descriptionInputController.text = "";
+      });
+
+      Future.delayed(Duration(milliseconds: 2000)).then((value) {
+        SVProgressHUD.dismiss();
+        closeView();
+      });
+    }
+
+    return result;
   }
 
 }
