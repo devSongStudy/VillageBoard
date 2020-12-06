@@ -1,9 +1,16 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svprogresshud/flutter_svprogresshud.dart';
 
 import 'generate_route.dart';
 
-void main() {
-  // TODO: Firebase initialize
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+
+  SVProgressHUD.setDefaultStyle(SVProgressHUDStyle.dark);
+  SVProgressHUD.setDefaultMaskType(SVProgressHUDMaskType.black);
+
   runApp(MyApp());
 }
 
