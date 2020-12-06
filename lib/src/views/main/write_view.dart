@@ -134,7 +134,7 @@ class _WriteViewState extends State<WriteView> {
 
     SVProgressHUD.show();
     try {
-      var urlString = "https://us-central1-villageboard-74c6b.cloudfunctions.net"+"/board/normal";
+      var urlString = "https://us-central1-villageboard-fd5ba.cloudfunctions.net"+"/board/normal";
       var body = json.encode({
         "title": title,
         "discription": discription

@@ -8,7 +8,7 @@ const cors = require('cors');
 var serviceAccount = require("../serviceAccountKey.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://villageboard-74c6b.firebaseio.com"
+  databaseURL: "https://villageboard-fd5ba.firebaseio.com"
 });
 /*/
 admin.initializeApp({
