@@ -42,3 +42,7 @@ app.*.map.json
 functions/serviceAccountKey.json
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
+functions/package-lock.json
+functions/.firebaserc
+functions/functions/package-lock.json
+functions/firebase.json
