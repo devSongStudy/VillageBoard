@@ -34,15 +34,13 @@ router.post('/normal', async (req, res) => {
 
 router.get('/normal', async (req, res) => {
     try {
-        var startAfter = req.params.startAfter;
-        if (!startAfter) { startAfter = 0; }
-
-        var endBefore = req.params.endBefore;
-        if (!endBefore) { endBefore = 0; }
-
-        const docRef = db.collection("BOARDS").doc("Normal").collection("Articles")
-                        .orderBy("createdAt", "asc").limit(100);
-        docRef.get().then(snapshot => {
+        let {startAfter = 0, limit = 10} = req.query;
+        startAfter = parseInt(startAfter);
+        var docRef = db.collection("BOARDS").doc("Normal").collection("Articles").orderBy("createdAt", "desc")
+        if (startAfter > 0) {
+            docRef = docRef.startAfter(startAfter);
+        }
+        docRef.limit(parseInt(limit)).get().then(snapshot => {
             var articles = [];
             snapshot.forEach((doc) => {
                 articles.push(doc.data());

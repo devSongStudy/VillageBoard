@@ -1,12 +1,10 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svprogresshud/flutter_svprogresshud.dart';
 import 'package:http/http.dart' as http;
 import 'package:villageboard/src/helpers/app_config.dart' as ex;
 import 'package:villageboard/src/models/article_data.dart';
 import 'package:intl/intl.dart';
-
 
 class MainView extends StatefulWidget {
   @override
@@ -15,11 +13,25 @@ class MainView extends StatefulWidget {
 
 class _MainViewState extends State<MainView> {
 
+  final _scrollController = ScrollController();
+  ArticlesData _articlesData;
+
   @override
   void initState() {
-    super.initState();
+    _articlesData = ArticlesData();
+    _scrollController.addListener(() {
+      if (_scrollController.position.maxScrollExtent == _scrollController.offset) {
+        _articlesData.loadMore();
+      }
+    });
 
-    //loadArticles();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -68,30 +80,47 @@ class _MainViewState extends State<MainView> {
                         ),
                       ),
                       Expanded(
-                        child: FutureBuilder(
-                          future: loadArticles(),
-                          builder: (BuildContext context, AsyncSnapshot <List<ArticleData>> snapshot){
-                            if (snapshot.hasError) {
-                              return Center(child: Text("Error - ${snapshot.error.toString()}"),);
-                            }
-
+                        child: StreamBuilder(
+                          stream: _articlesData.stream,
+                          builder: (BuildContext context, AsyncSnapshot snapshot) {
                             if (snapshot.hasData == false) {
-                              return Center(child: CircularProgressIndicator(),);
+                              return Center(child: CircularProgressIndicator());
                             }
 
-                            return ListView.separated(
-                              itemCount: snapshot.data.length,
-                              itemBuilder: (context, index) {
-                                final ArticleData item = snapshot.data[index];
-                                var date = new DateTime.fromMillisecondsSinceEpoch(item.createdAt * 1000);
-                                return ListTile(
+                            return RefreshIndicator(
+                              // TODO: RefreshIndicator 는 리스트 스크롤이 안되면 리플레쉬 이벤트가 안 일어난다.
+                              onRefresh: _articlesData.refresh,
+                              child: ListView.separated(
+                                controller: _scrollController,
+                                itemCount: snapshot.data.length + 1,
+                                itemBuilder: (context, index) {
+                                  if (index < snapshot.data.length) {
+                                    final ArticleData item = snapshot.data[index];
+                                    var date = new DateTime.fromMillisecondsSinceEpoch(item.createdAt * 1000);
+                                    return ListTile(
                                       title: Text(item.title),
                                       subtitle: Text(DateFormat('yyyy-MM-dd HH:mm').format(date)),
                                     );
-                              },
-                              separatorBuilder: (context, index) {
-                                return Divider();
-                              },
+                                  } else if (_articlesData.hasMore) {
+                                    return Padding(
+                                      padding: EdgeInsets.symmetric(vertical: 20),
+                                      child: Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    );
+                                  } else {
+                                    return Padding(
+                                      padding: EdgeInsets.symmetric(vertical: 20),
+                                      child: snapshot.data.length > 0 ? null :
+                                      // TODO: 데이터가 없을때 화면 새로고침 버튼이 필요하다.     
+                                      Text("refresh"),
+                                    );
+                                  }
+                                },
+                                separatorBuilder: (context, index) {
+                                  return Divider();
+                                },
+                              ),
                             );
                           },
                         ),
@@ -131,33 +160,4 @@ class _MainViewState extends State<MainView> {
     }
   }
 
-  Future<List<ArticleData>> loadArticles() async {
-    List<ArticleData> list = [];
-    //SVProgressHUD.show();
-    try {
-      var urlString = "https://us-central1-villageboard-fd5ba.cloudfunctions.net"+"/board/normal";
-      final response = await http.get(urlString);
-      if (response.statusCode == 200) {
-        //print("response: $response.body");
-        Map<String, dynamic> object = jsonDecode(response.body);
-        int resCode = object['resCode'];
-        if (resCode == 0) {
-          List articles = object['resData']['articles'];
-          if (articles.isNotEmpty) {
-            list = articles.map((data) => ArticleData.fromMap(data)).toList();
-          }
-        } else {
-          throw Exception('$resCode: ${object['resMessage']}');
-        }
-        //SVProgressHUD.dismiss();
-      } else {
-        throw Exception('failed to load data: ${response.statusCode}');
-      }
-    } catch (err) {
-      print("Error: $err");
-      //SVProgressHUD.showError(status: err.toString());
-      //SVProgressHUD.dismiss(delay: Duration(milliseconds: 2000));
-    }
-    return list;
-  }
 }
