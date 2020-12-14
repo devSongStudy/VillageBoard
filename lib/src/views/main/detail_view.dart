@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:villageboard/src/helpers/app_config.dart' as ex;
+import 'package:villageboard/src/models/article_data.dart';
+import 'package:intl/intl.dart';
 
 class DetailView extends StatefulWidget {
+
+  final ArticleData articleData;
+
+  DetailView({this.articleData});
+
   @override
   _DetailViewState createState() => _DetailViewState();
 }
@@ -9,6 +16,9 @@ class DetailView extends StatefulWidget {
 class _DetailViewState extends State<DetailView> {
   @override
   Widget build(BuildContext context) {
+
+    var date = new DateTime.fromMillisecondsSinceEpoch(widget.articleData.createdAt * 1000);
+
     return WillPopScope(
       onWillPop: () {
         return Future(() => true);
@@ -31,15 +41,43 @@ class _DetailViewState extends State<DetailView> {
                 flex: 4,
                 child: Container(
                   padding: EdgeInsets.all(20),
-                  color: Colors.pinkAccent,
+                  //color: Colors.pinkAccent,
                   width: double.infinity,
-                  child: Column(
-                    children: [
-                      RaisedButton(
-                        onPressed: closeView,
-                        child: Text("Back"),
-                      ),
-                    ],
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            RaisedButton(
+                              onPressed: closeView,
+                              child: Text("Back"),
+                            ),
+                            RaisedButton(
+                              onPressed: () {
+                              },
+                              child: Text("수정"),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(padding: EdgeInsets.all(10),),
+                            Text(
+                              widget.articleData.title,
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(DateFormat('yyyy-MM-dd HH:mm').format(date)),
+                            Divider(color: Colors.grey,),
+                            Text(widget.articleData.discription),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

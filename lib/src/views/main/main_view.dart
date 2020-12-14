@@ -100,6 +100,9 @@ class _MainViewState extends State<MainView> {
                                     return ListTile(
                                       title: Text(item.title),
                                       subtitle: Text(DateFormat('yyyy-MM-dd HH:mm').format(date)),
+                                      onTap: () {
+                                        showDetailView(item);
+                                      },
                                     );
                                   } else if (_articlesData.hasMore) {
                                     return Padding(
@@ -144,9 +147,9 @@ class _MainViewState extends State<MainView> {
     }
   }
 
-  void showDetailView() {
+  void showDetailView(ArticleData item) {
     try {
-      Navigator.of(context).pushNamed('/Detail');
+      Navigator.of(context).pushNamed('/Detail', arguments: item);
     } catch (e) {
       print('Error: $e');
     }
@@ -155,11 +158,18 @@ class _MainViewState extends State<MainView> {
   void showWriteView() {
     try {
       Navigator.of(context).pushNamed('/Write').then((value) => {
-        _articlesData.refresh()
+        if (value) {
+          refresh()
+        }
       });
     } catch (e) {
       print('Error: $e');
     }
+  }
+
+  void refresh() {
+    _articlesData.refresh();
+    _scrollController.jumpTo(0.0);
   }
 
 }

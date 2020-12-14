@@ -80,7 +80,7 @@ class _WriteViewState extends State<WriteView> {
                                     });
 
                                     try {
-                                      Navigator.of(context).pop();
+                                      Navigator.of(context).pop(true);
                                     } catch (e) {
                                       print('Error: $e');
                                     }
