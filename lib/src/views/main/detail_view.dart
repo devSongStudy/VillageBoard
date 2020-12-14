@@ -55,6 +55,11 @@ class _DetailViewState extends State<DetailView> {
                             ),
                             RaisedButton(
                               onPressed: () {
+
+                                Navigator.of(context).pushNamed('/Write', arguments: widget.articleData).then((value) => {
+                                  reload(value)
+                                });
+
                               },
                               child: Text("수정"),
                             ),
@@ -90,9 +95,18 @@ class _DetailViewState extends State<DetailView> {
 
   void closeView() {
     try {
-      Navigator.of(context).pop();
+
+
+      Navigator.of(context).pop(widget.articleData);
     } catch (e) {
       print('Error: $e');
     }
+  }
+  
+  void reload(ArticleData value) {
+    widget.articleData.title = value.title;
+    widget.articleData.discription = value.discription;
+    setState(() {
+    });
   }
 }

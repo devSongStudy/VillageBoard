@@ -4,9 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svprogresshud/flutter_svprogresshud.dart';
 import 'package:villageboard/src/helpers/app_config.dart' as ex;
 import 'package:http/http.dart' as http;
+import 'package:villageboard/src/models/article_data.dart';
 import 'package:villageboard/src/views/main/main_view.dart';
 
 class WriteView extends StatefulWidget {
+
+  final ArticleData articleData;
+
+  WriteView({this.articleData});
+
   @override
   _WriteViewState createState() => _WriteViewState();
 }
@@ -20,8 +26,8 @@ class _WriteViewState extends State<WriteView> {
   void initState() {
     super.initState();
 
-    _titleInputController.text = "";
-    _descriptionInputController.text = "";
+    _titleInputController.text = widget.articleData == null ? "" : widget.articleData.title;
+    _descriptionInputController.text = widget.articleData == null ? "" : widget.articleData.discription;
   }
 
   @override
@@ -47,7 +53,7 @@ class _WriteViewState extends State<WriteView> {
                 child: Container(
                   alignment: Alignment.center,
                   color: ex.Colors().randomColor(),
-                  child: Text('${this.widget}',
+                  child: Text('${widget.articleData == null ? this.widget : "EditView"}',
                     style: TextStyle(fontSize: 28.0),
                   ),
                 ),
@@ -70,25 +76,48 @@ class _WriteViewState extends State<WriteView> {
                             ),
                             RaisedButton(
                               onPressed: () async {
-                                var result = await saveArticle(context);
-                                if (result) {
-                                  Future.delayed(Duration(milliseconds: 500)).then((value) {
-                                    SVProgressHUD.dismiss();
-                                    setState(() {
-                                      _titleInputController.text = "";
-                                      _descriptionInputController.text = "";
+                                if (widget.articleData == null) {
+                                  var result = await saveArticle(context);
+                                  if (result) {
+                                    Future.delayed(Duration(milliseconds: 500))
+                                        .then((value) {
+                                      SVProgressHUD.dismiss();
+                                      setState(() {
+                                        _titleInputController.text = "";
+                                        _descriptionInputController.text = "";
+                                      });
+
+                                      try {
+                                        Navigator.of(context).pop(true);
+                                      } catch (e) {
+                                        print('Error: $e');
+                                      }
                                     });
+                                  }
+                                } else {
+                                  var result = await editArticle(context, widget.articleData.createdAt);
+                                  if (result) {
+                                    Future.delayed(Duration(milliseconds: 500))
+                                        .then((value) {
+                                      SVProgressHUD.dismiss();
+                                      try {
+                                        widget.articleData.title = _titleInputController.text;
+                                        widget.articleData.discription = _descriptionInputController.text;
 
-                                    try {
-                                      Navigator.of(context).pop(true);
-                                    } catch (e) {
-                                      print('Error: $e');
-                                    }
+                                        setState(() {
+                                          _titleInputController.text = "";
+                                          _descriptionInputController.text = "";
+                                        });
 
-                                  });
+                                        Navigator.of(context).pop(widget.articleData);
+                                      } catch (e) {
+                                        print('Error: $e');
+                                      }
+                                    });
+                                  }
                                 }
                               },
-                              child: Text("등록"),
+                              child: Text(widget.articleData == null ? "등록" : "수정"),
                             ),
                           ],
                         ),
@@ -157,6 +186,57 @@ class _WriteViewState extends State<WriteView> {
         "discription": discription
       });
       final response = await http.post(urlString, body: body, headers: {'content-type':'application/json'});
+      if (response.statusCode == 200) {
+        print("response: $response.body");
+        Map<String, dynamic> object = jsonDecode(response.body);
+        int resCode = object['resCode'];
+        if (resCode == 0) {
+          result = true;
+        } else {
+          throw Exception('$resCode: ${object['resMessage']}');
+        }
+        SVProgressHUD.dismiss();
+      } else {
+        throw Exception('failed to load data: ${response.statusCode}');
+      }
+    } catch (err) {
+      print("Error: $err");
+      SVProgressHUD.showError(status: err.toString());
+      SVProgressHUD.dismiss(delay: Duration(milliseconds: 2000));
+    }
+
+    return result;
+  }
+
+  Future<bool> editArticle(BuildContext context, int createdAt) async {
+
+    FocusScope.of(context).unfocus();
+
+    String title = _titleInputController.text;
+    print('title: $title');
+    if (title.isEmpty) {
+      SVProgressHUD.showError(status: "제목을 입력하세요.");
+      return false;
+    }
+
+    String discription = _descriptionInputController.text;
+    print('discription: $discription');
+    if (discription.isEmpty) {
+      SVProgressHUD.showError(status: "내용을 입력하세요");
+      return false;
+    }
+
+    bool result = false;
+
+    SVProgressHUD.show();
+    try {
+      var urlString = "https://us-central1-villageboard-fd5ba.cloudfunctions.net"+"/board/normal";
+      var body = json.encode({
+        "title": title,
+        "discription": discription,
+        "createdAt": createdAt
+      });
+      final response = await http.put(urlString, body: body, headers: {'content-type':'application/json'});
       if (response.statusCode == 200) {
         print("response: $response.body");
         Map<String, dynamic> object = jsonDecode(response.body);

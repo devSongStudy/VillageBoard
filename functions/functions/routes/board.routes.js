@@ -32,6 +32,38 @@ router.post('/normal', async (req, res) => {
     }
 });
 
+router.put('/normal', async (req, res) => {
+    try {
+        const title = req.body.title;
+        if (!title) throw new Error("title is null");
+
+        const discription = req.body.discription;
+        if (!discription) throw new Error("discription is null");
+
+        const createdAt = req.body.createdAt;
+        if (!createdAt) throw new Error("createdAt is null");
+
+        const updatedAt = admin.firestore.Timestamp.now().seconds;
+
+        await db.collection("BOARDS")
+            .doc("Normal")
+            .collection("Articles")
+            .doc("/" + createdAt + "/")
+            .set({
+                title: title,
+                discription: discription,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+            });
+
+        return res.json({resCode: 0, resMessage:"Success"});
+
+    } catch (err) {
+        console.log("Error: ", err);
+        return res.json({resCode: 9999, resMessage: "정의되지 않은 에러"});
+    }
+});
+
 router.get('/normal', async (req, res) => {
     try {
         let {startAfter = 0, limit = 10} = req.query;

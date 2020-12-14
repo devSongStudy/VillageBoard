@@ -115,8 +115,14 @@ class _MainViewState extends State<MainView> {
                                     return Padding(
                                       padding: EdgeInsets.symmetric(vertical: 20),
                                       child: snapshot.data.length > 0 ? null :
-                                      // TODO: 데이터가 없을때 화면 새로고침 버튼이 필요하다.     
-                                      Text("refresh"),
+                                      Center(
+                                        child: RaisedButton(
+                                          onPressed: () {
+                                            refresh();
+                                          },
+                                          child: Text('Refresh'),
+                                        ),
+                                      ),
                                     );
                                   }
                                 },
@@ -149,7 +155,9 @@ class _MainViewState extends State<MainView> {
 
   void showDetailView(ArticleData item) {
     try {
-      Navigator.of(context).pushNamed('/Detail', arguments: item);
+      Navigator.of(context).pushNamed('/Detail', arguments: item).then((value) => {
+        setState(() {})
+      });
     } catch (e) {
       print('Error: $e');
     }

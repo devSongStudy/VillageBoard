@@ -142,7 +142,7 @@ Future<List<ArticleData>>loadArticles({int startAfter=0}) async {
   } catch (err) {
     print("Error: $err");
     SVProgressHUD.showError(status: err.toString());
-    SVProgressHUD.dismiss(delay: Duration(milliseconds: 2000));
+    SVProgressHUD.dismiss(delay: Duration(milliseconds: 1000));
   }
   return list;
 }
