@@ -120,7 +120,7 @@ Future<List<ArticleData>>loadArticles({int startAfter=0}) async {
     var urlString = "https://us-central1-villageboard-fd5ba.cloudfunctions.net"+"/board/normal";
     Map<String, String> queryParams = {
       'startAfter': startAfter.toString(),
-      'limit': '5'
+      'limit': '10'
     };
     String queryString = Uri(queryParameters: queryParams).query;
     final response = await http.get(urlString + "?" + queryString);

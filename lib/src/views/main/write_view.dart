@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svprogresshud/flutter_svprogresshud.dart';
 import 'package:villageboard/src/helpers/app_config.dart' as ex;
 import 'package:http/http.dart' as http;
+import 'package:villageboard/src/views/main/main_view.dart';
 
 class WriteView extends StatefulWidget {
   @override
@@ -68,8 +69,24 @@ class _WriteViewState extends State<WriteView> {
                               child: Text("Back"),
                             ),
                             RaisedButton(
-                              onPressed: () {
-                                saveArticle(context);
+                              onPressed: () async {
+                                var result = await saveArticle(context);
+                                if (result) {
+                                  Future.delayed(Duration(milliseconds: 500)).then((value) {
+                                    SVProgressHUD.dismiss();
+                                    setState(() {
+                                      _titleInputController.text = "";
+                                      _descriptionInputController.text = "";
+                                    });
+
+                                    try {
+                                      Navigator.of(context).pop();
+                                    } catch (e) {
+                                      print('Error: $e');
+                                    }
+
+                                  });
+                                }
                               },
                               child: Text("등록"),
                             ),
@@ -157,21 +174,6 @@ class _WriteViewState extends State<WriteView> {
       print("Error: $err");
       SVProgressHUD.showError(status: err.toString());
       SVProgressHUD.dismiss(delay: Duration(milliseconds: 2000));
-    }
-
-    if (result) {
-
-      SVProgressHUD.showSuccess(status: "Success!");
-
-      setState(() {
-        _titleInputController.text = "";
-        _descriptionInputController.text = "";
-      });
-
-      Future.delayed(Duration(milliseconds: 2000)).then((value) {
-        SVProgressHUD.dismiss();
-        closeView();
-      });
     }
 
     return result;

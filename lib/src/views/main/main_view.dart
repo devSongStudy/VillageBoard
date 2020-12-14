@@ -88,7 +88,6 @@ class _MainViewState extends State<MainView> {
                             }
 
                             return RefreshIndicator(
-                              // TODO: RefreshIndicator 는 리스트 스크롤이 안되면 리플레쉬 이벤트가 안 일어난다.
                               onRefresh: _articlesData.refresh,
                               child: ListView.separated(
                                 physics: AlwaysScrollableScrollPhysics(),
@@ -155,7 +154,9 @@ class _MainViewState extends State<MainView> {
 
   void showWriteView() {
     try {
-      Navigator.of(context).pushNamed('/Write');
+      Navigator.of(context).pushNamed('/Write').then((value) => {
+        _articlesData.refresh()
+      });
     } catch (e) {
       print('Error: $e');
     }
