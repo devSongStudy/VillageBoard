@@ -1,5 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_svprogresshud/flutter_svprogresshud.dart';
+import 'package:http/http.dart' as http;
 import 'package:villageboard/src/helpers/app_config.dart' as ex;
+import 'package:villageboard/src/models/article_data.dart';
+import 'package:intl/intl.dart';
 
 class MainView extends StatefulWidget {
   @override
@@ -7,6 +12,28 @@ class MainView extends StatefulWidget {
 }
 
 class _MainViewState extends State<MainView> {
+
+  final _scrollController = ScrollController();
+  ArticlesData _articlesData;
+
+  @override
+  void initState() {
+    _articlesData = ArticlesData();
+    _scrollController.addListener(() {
+      if (_scrollController.position.maxScrollExtent == _scrollController.offset) {
+        _articlesData.loadMore();
+      }
+    });
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -28,22 +55,76 @@ class _MainViewState extends State<MainView> {
               Expanded(
                 flex: 4,
                 child: Container(
-                  padding: EdgeInsets.all(20),
-                  color: Colors.pinkAccent,
+                  padding: EdgeInsets.fromLTRB(0, 20, 0, 8),
+                  //color: Colors.pinkAccent,
                   width: double.infinity,
                   child: Column(
                     children: [
-                      RaisedButton(
-                        onPressed: showSignInView,
-                        child: Text("Log Out"),
+                      SizedBox(
+                        height: ex.App(context).appHeight(10),
+                        child: Container(
+                          padding: EdgeInsets.only(left: 20, right: 20),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              RaisedButton(
+                                onPressed: showSignInView,
+                                child: Text("Log Out"),
+                              ),
+                              RaisedButton(
+                                onPressed: showWriteView,
+                                child: Text("Write View"),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                      RaisedButton(
-                        onPressed: showDetailView,
-                        child: Text("Detail View"),
-                      ),
-                      RaisedButton(
-                        onPressed: showWriteView,
-                        child: Text("Write View"),
+                      Expanded(
+                        child: StreamBuilder(
+                          stream: _articlesData.stream,
+                          builder: (BuildContext context, AsyncSnapshot snapshot) {
+                            if (snapshot.hasData == false) {
+                              return Center(child: CircularProgressIndicator());
+                            }
+
+                            return RefreshIndicator(
+                              // TODO: RefreshIndicator 는 리스트 스크롤이 안되면 리플레쉬 이벤트가 안 일어난다.
+                              onRefresh: _articlesData.refresh,
+                              child: ListView.separated(
+                                physics: AlwaysScrollableScrollPhysics(),
+                                controller: _scrollController,
+                                itemCount: snapshot.data.length + 1,
+                                itemBuilder: (context, index) {
+                                  if (index < snapshot.data.length) {
+                                    final ArticleData item = snapshot.data[index];
+                                    var date = new DateTime.fromMillisecondsSinceEpoch(item.createdAt * 1000);
+                                    return ListTile(
+                                      title: Text(item.title),
+                                      subtitle: Text(DateFormat('yyyy-MM-dd HH:mm').format(date)),
+                                    );
+                                  } else if (_articlesData.hasMore) {
+                                    return Padding(
+                                      padding: EdgeInsets.symmetric(vertical: 20),
+                                      child: Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    );
+                                  } else {
+                                    return Padding(
+                                      padding: EdgeInsets.symmetric(vertical: 20),
+                                      child: snapshot.data.length > 0 ? null :
+                                      // TODO: 데이터가 없을때 화면 새로고침 버튼이 필요하다.     
+                                      Text("refresh"),
+                                    );
+                                  }
+                                },
+                                separatorBuilder: (context, index) {
+                                  return Divider();
+                                },
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ],
                   ),
@@ -79,4 +160,5 @@ class _MainViewState extends State<MainView> {
       print('Error: $e');
     }
   }
+
 }

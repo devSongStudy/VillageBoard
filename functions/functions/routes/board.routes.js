@@ -32,4 +32,33 @@ router.post('/normal', async (req, res) => {
     }
 });
 
+router.get('/normal', async (req, res) => {
+    try {
+        let {startAfter = 0, limit = 10} = req.query;
+        startAfter = parseInt(startAfter);
+        var docRef = db.collection("BOARDS").doc("Normal").collection("Articles").orderBy("createdAt", "desc")
+        if (startAfter > 0) {
+            docRef = docRef.startAfter(startAfter);
+        }
+        docRef.limit(parseInt(limit)).get().then(snapshot => {
+            var articles = [];
+            snapshot.forEach((doc) => {
+                articles.push(doc.data());
+            });
+            return res.json({
+                resCode: 0,
+                resData: { articles: articles }
+            });
+
+        }).catch(err => {
+            console.log(err);
+            return res.json({resCode: 1000, resMessage: "DB Get failed"});
+        });
+
+    } catch (err) {
+        console.log("Error: ", err);
+        return res.json({resCode: 9999, resMessage: "정의되지 않은 에러"});
+    }
+});
+
 module.exports = router;
