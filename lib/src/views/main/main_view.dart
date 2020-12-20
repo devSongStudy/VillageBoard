@@ -88,7 +88,6 @@ class _MainViewState extends State<MainView> {
                             }
 
                             return RefreshIndicator(
-                              // TODO: RefreshIndicator 는 리스트 스크롤이 안되면 리플레쉬 이벤트가 안 일어난다.
                               onRefresh: _articlesData.refresh,
                               child: ListView.separated(
                                 physics: AlwaysScrollableScrollPhysics(),
@@ -101,6 +100,9 @@ class _MainViewState extends State<MainView> {
                                     return ListTile(
                                       title: Text(item.title),
                                       subtitle: Text(DateFormat('yyyy-MM-dd HH:mm').format(date)),
+                                      onTap: () {
+                                        showDetailView(item);
+                                      },
                                     );
                                   } else if (_articlesData.hasMore) {
                                     return Padding(
@@ -113,8 +115,14 @@ class _MainViewState extends State<MainView> {
                                     return Padding(
                                       padding: EdgeInsets.symmetric(vertical: 20),
                                       child: snapshot.data.length > 0 ? null :
-                                      // TODO: 데이터가 없을때 화면 새로고침 버튼이 필요하다.     
-                                      Text("refresh"),
+                                      Center(
+                                        child: RaisedButton(
+                                          onPressed: () {
+                                            refresh();
+                                          },
+                                          child: Text('Refresh'),
+                                        ),
+                                      ),
                                     );
                                   }
                                 },
@@ -145,9 +153,11 @@ class _MainViewState extends State<MainView> {
     }
   }
 
-  void showDetailView() {
+  void showDetailView(ArticleData item) {
     try {
-      Navigator.of(context).pushNamed('/Detail');
+      Navigator.of(context).pushNamed('/Detail', arguments: item).then((value) => {
+        setState(() {})
+      });
     } catch (e) {
       print('Error: $e');
     }
@@ -155,10 +165,19 @@ class _MainViewState extends State<MainView> {
 
   void showWriteView() {
     try {
-      Navigator.of(context).pushNamed('/Write');
+      Navigator.of(context).pushNamed('/Write').then((value) => {
+        if (value) {
+          refresh()
+        }
+      });
     } catch (e) {
       print('Error: $e');
     }
+  }
+
+  void refresh() {
+    _articlesData.refresh();
+    _scrollController.jumpTo(0.0);
   }
 
 }

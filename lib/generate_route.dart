@@ -23,9 +23,9 @@ class GenerateRoute {
       case '/Main':
         return MaterialPageRoute(builder: (_) => MainView());
       case '/Detail':
-        return MaterialPageRoute(builder: (_) => DetailView());
+        return MaterialPageRoute(builder: (_) => DetailView(articleData: args));
       case '/Write':
-        return MaterialPageRoute(builder: (_) => WriteView());
+        return MaterialPageRoute(builder: (_) => WriteView(articleData: args));
 
       default:
         return MaterialPageRoute(builder: (_) => Scaffold(body: SafeArea(child: Text('Route Error'),),));
