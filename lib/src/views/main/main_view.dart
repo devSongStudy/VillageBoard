@@ -13,6 +13,8 @@ class MainView extends StatefulWidget {
 
 class _MainViewState extends State<MainView> {
 
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   final _scrollController = ScrollController();
   ArticlesData _articlesData;
 
@@ -36,20 +38,64 @@ class _MainViewState extends State<MainView> {
 
   @override
   Widget build(BuildContext context) {
+
+    Size screenSize = MediaQuery.of(context).size;
+    double width = screenSize.width;
+    double height = screenSize.height;
+
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
+        key: _scaffoldKey,
+        drawer: Drawer(
+          child: SafeArea(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: <Widget>[
+                Container(
+                  height: height / 5,
+                  child: DrawerHeader(
+                    child: Center(
+                      child: Text(
+                        'SideMenu',
+                        style: TextStyle(color: Colors.white, fontSize: 25),
+                      ),
+                    ),
+                    decoration: BoxDecoration(
+                      color: ex.Colors().randomColor(),
+                    ),
+                  ),
+                ),
+                ListTile(
+                  leading: Icon(Icons.exit_to_app),
+                  title: Text('Log Out'),
+                  onTap: showSignInView,
+                ),
+              ],
+            ),
+          ),
+        ),
         body: SafeArea(
           child: Column(
             children: [
               Expanded(
                 flex: 1,
-                child: Container(
-                  alignment: Alignment.center,
-                  color: ex.Colors().randomColor(),
-                  child: Text('${this.widget}',
-                    style: TextStyle(fontSize: 28.0),
-                  ),
+                child: Stack(
+                  children: [
+                    Container(
+                      alignment: Alignment.center,
+                      color: ex.Colors().randomColor(),
+                      child: Text('${this.widget}',
+                        style: TextStyle(fontSize: 28.0),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.menu),
+                      onPressed: () {
+                        _scaffoldKey.currentState.openDrawer();
+                      },
+                    ),
+                  ],
                 ),
               ),
               Expanded(
