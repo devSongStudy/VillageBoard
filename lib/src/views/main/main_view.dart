@@ -156,7 +156,7 @@ class _MainViewState extends State<MainView> {
   void showDetailView(ArticleData item) {
     try {
       Navigator.of(context).pushNamed('/Detail', arguments: item).then((value) => {
-        setState(() {})
+        refresh()
       });
     } catch (e) {
       print('Error: $e');

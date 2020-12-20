@@ -117,7 +117,7 @@ class _WriteViewState extends State<WriteView> {
                                   }
                                 }
                               },
-                              child: Text(widget.articleData == null ? "등록" : "수정"),
+                              child: Text(widget.articleData == null ? "등록" : "완료"),
                             ),
                           ],
                         ),

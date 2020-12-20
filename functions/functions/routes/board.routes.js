@@ -93,4 +93,23 @@ router.get('/normal', async (req, res) => {
     }
 });
 
+router.delete('/normal/:createdAt', async (req, res) => {
+    try {
+        const createdAt = req.params.createdAt;
+        if (!createdAt) throw new Error("createdAt is null");
+
+        await db.collection("BOARDS")
+            .doc("Normal")
+            .collection("Articles")
+            .doc("/" + createdAt + "/")
+            .delete();
+
+        return res.json({resCode: 0, resMessage:"Success"});
+
+    } catch (err) {
+        console.log("Error: ", err);
+        return res.json({resCode: 9999, resMessage: "정의되지 않은 에러"});
+    }
+});
+
 module.exports = router;
