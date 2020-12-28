@@ -6,7 +6,7 @@ import 'generate_route.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  //await Firebase.initializeApp();
 
   SVProgressHUD.setDefaultStyle(SVProgressHUDStyle.dark);
   SVProgressHUD.setDefaultMaskType(SVProgressHUDMaskType.black);

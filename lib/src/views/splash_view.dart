@@ -1,4 +1,6 @@
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:villageboard/src/helpers/app_config.dart' as ex;
 
@@ -8,6 +10,8 @@ class SplashView extends StatefulWidget {
 }
 
 class _SplashViewState extends State<SplashView> {
+  final Future<FirebaseApp> _initialization = Firebase.initializeApp();
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -28,22 +32,28 @@ class _SplashViewState extends State<SplashView> {
               ),
               Expanded(
                 flex: 4,
-                child: Container(
-                  padding: EdgeInsets.all(20),
-                  color: Colors.pinkAccent,
-                  width: double.infinity,
-                  child: Column(
-                    children: [
-                      RaisedButton(
-                        onPressed: showSignInView,
-                        child: Text("SignIn View"),
+                child: FutureBuilder(
+                  future: _initialization,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      print("### Error: ${snapshot.error?.toString()}");
+                      showNextPage(context, hasError: true);
+                    } else {
+                      if (snapshot.connectionState == ConnectionState.done) {
+                        showNextPage(context);
+                      }
+                    }
+                    return WillPopScope(
+                      onWillPop: () async => false,
+                      child: Scaffold(
+                        body: SafeArea(
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
                       ),
-                      RaisedButton(
-                        onPressed: showMainView,
-                        child: Text("Main View"),
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
               ),
             ],
@@ -53,20 +63,18 @@ class _SplashViewState extends State<SplashView> {
     );
   }
 
-  void showSignInView() {
-    try {
-      Navigator.of(context).pushReplacementNamed('/SignIn');
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
-
-  void showMainView() {
-    try {
-      Navigator.of(context).pushReplacementNamed('/Main');
-    } catch (e) {
-      print('Error: $e');
-    }
+  void showNextPage(BuildContext context, {bool hasError = false}) {
+    Future.delayed(Duration(milliseconds: 1000)).then((value) {
+      try {
+        if (hasError == true || FirebaseAuth.instance.currentUser == null) {
+          Navigator.of(context).pushNamedAndRemoveUntil('/SignIn', (route) => false);
+        } else {
+          Navigator.of(context).pushNamedAndRemoveUntil('/Main', (route) => false);
+        }
+      } catch (e) {
+        print('Error: $e');
+      }
+    });
   }
 
 }
