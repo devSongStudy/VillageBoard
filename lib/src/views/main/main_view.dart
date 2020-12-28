@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svprogresshud/flutter_svprogresshud.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:villageboard/src/helpers/app_config.dart' as ex;
 import 'package:villageboard/src/models/article_data.dart';
@@ -12,6 +14,8 @@ class MainView extends StatefulWidget {
 }
 
 class _MainViewState extends State<MainView> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -69,7 +73,9 @@ class _MainViewState extends State<MainView> {
                 ListTile(
                   leading: Icon(Icons.exit_to_app),
                   title: Text('Log Out'),
-                  onTap: showSignInView,
+                  onTap: () {
+                    signOut(context);
+                  },
                 ),
               ],
             ),
@@ -111,12 +117,8 @@ class _MainViewState extends State<MainView> {
                         child: Container(
                           padding: EdgeInsets.only(left: 20, right: 20),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              RaisedButton(
-                                onPressed: showSignInView,
-                                child: Text("Log Out"),
-                              ),
                               RaisedButton(
                                 onPressed: showWriteView,
                                 child: Text("Write View"),
@@ -191,8 +193,12 @@ class _MainViewState extends State<MainView> {
     );
   }
 
-  void showSignInView() {
+  Future<void> signOut(BuildContext context) async {
     try {
+      SVProgressHUD.show();
+      await _auth.signOut();
+      await _googleSignIn.signOut();
+      SVProgressHUD.dismiss();
       Navigator.of(context).pushReplacementNamed('/SignIn');
     } catch (e) {
       print('Error: $e');
