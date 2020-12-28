@@ -56,18 +56,22 @@ class _MainViewState extends State<MainView> {
             child: ListView(
               padding: EdgeInsets.zero,
               children: <Widget>[
-                Container(
-                  height: height / 5,
-                  child: DrawerHeader(
-                    child: Center(
-                      child: Text(
-                        'SideMenu',
-                        style: TextStyle(color: Colors.white, fontSize: 25),
+                DrawerHeader(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      SizedBox(
+                        width: 80.0,
+                        height: 80.0,
+                        child: CircleAvatar(
+                          backgroundImage: NetworkImage(_auth.currentUser.photoURL),
+                        ),
                       ),
-                    ),
-                    decoration: BoxDecoration(
-                      color: ex.Colors().randomColor(),
-                    ),
+                      Text(
+                        _auth.currentUser.email,
+                        style: TextStyle(color: Colors.black, fontSize: 16),
+                      ),
+                    ],
                   ),
                 ),
                 ListTile(
