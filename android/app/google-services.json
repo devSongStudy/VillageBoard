@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "674051146575",
+    "firebase_url": "https://villageboard-fd5ba.firebaseio.com",
+    "project_id": "villageboard-fd5ba",
+    "storage_bucket": "villageboard-fd5ba.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:674051146575:android:529abc0be2ee3e3512fb3a",
+        "android_client_info": {
+          "package_name": "app.ssong.villageboard"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "674051146575-gnork2r05b484u6n39qekl840lnq676a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.ssong.villageboard",
+            "certificate_hash": "d152d83aa2a841048f8037484163d4e620f10c8f"
+          }
+        },
+        {
+          "client_id": "674051146575-h9vhc2tl7b760dfla70j2q775u5759t1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEq-g2LUETHO3QL1PuArFsczuYkwzvadQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "674051146575-h9vhc2tl7b760dfla70j2q775u5759t1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "674051146575-esuhm777o6r3v1pq9j2ebikng8pcj0ce.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "app.ssong.villageboard"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
